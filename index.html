@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moving Circle</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        #canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Parámetros ajustables
+        const circleRadius = 100;  // Tamaño del círculo
+        const speed = 2;          // Velocidad de movimiento constante del círculo
+
+        let circle = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: circleRadius,
+            dx: 0,
+            dy: 0,
+            isDragging: false,
+            lastMouseX: 0,
+            lastMouseY: 0
+        };
+
+        function drawCircle() {
+            ctx.beginPath();
+            ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2);
+            ctx.fillStyle = '#0833A2'; // Cambiar el color del círculo a #0833A2
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function updateCircle() {
+            circle.x += circle.dx;
+            circle.y += circle.dy;
+
+            // Detectar colisión con los bordes y rebotar
+            if (circle.x + circle.radius > canvas.width || circle.x - circle.radius < 0) {
+                circle.dx *= -1;
+            }
+
+            if (circle.y + circle.radius > canvas.height || circle.y - circle.radius < 0) {
+                circle.dy *= -1;
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawCircle();
+            updateCircle();
+            requestAnimationFrame(animate);
+        }
+
+        canvas.addEventListener('mousedown', (event) => {
+            const distance = Math.hypot(event.clientX - circle.x, event.clientY - circle.y);
+            if (distance < circle.radius) {
+                circle.isDragging = true;
+                circle.lastMouseX = event.clientX;
+                circle.lastMouseY = event.clientY;
+            }
+        });
+
+        canvas.addEventListener('mousemove', (event) => {
+            if (circle.isDragging) {
+                const deltaX = event.clientX - circle.lastMouseX;
+                const deltaY = event.clientY - circle.lastMouseY;
+                circle.dx = (deltaX > 0 ? 1 : -1) * speed; // Dirección constante basada en el movimiento
+                circle.dy = (deltaY > 0 ? 1 : -1) * speed;
+                circle.lastMouseX = event.clientX;
+                circle.lastMouseY = event.clientY;
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            circle.isDragging = false;
+        });
+
+        animate()
+    </script>
+</body>
+</html>
